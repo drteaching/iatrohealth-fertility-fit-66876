@@ -11,8 +11,10 @@ import {
   Video,
   Clock,
   Pill,
-  MessageSquare
+  MessageSquare,
+  User
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import DeviceConnection from "@/components/wearables/DeviceConnection";
@@ -115,6 +117,16 @@ const Index = () => {
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Clinician Chat
                 </Button>
+
+                <Link to="/account">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Account
+                  </Button>
+                </Link>
               </div>
 
               {/* Health stats summary */}

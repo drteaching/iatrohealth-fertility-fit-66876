@@ -20,7 +20,8 @@ const Navbar = () => {
     { label: "Exercise", path: "/exercise" },
     { label: "Devices", path: "/devices" },
     { label: "Medications", path: "/devices", icon: Pill },
-    { label: "Doctor Chat", path: "/devices", icon: MessageSquare },
+    { label: "Clinician Chat", path: "/devices", icon: MessageSquare },
+    { label: "Account", path: "/account", icon: User },
   ];
 
   return (
@@ -61,12 +62,14 @@ const Navbar = () => {
             <BellRing className="h-5 w-5" />
           </Button>
 
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-iatrohealth-100 text-iatrohealth-700">
-              JD
-            </AvatarFallback>
-          </Avatar>
+          <Link to="/account">
+            <Avatar className="h-8 w-8 cursor-pointer">
+              <AvatarImage src="https://images.unsplash.com/photo-1582562124811-c09040d0a901" />
+              <AvatarFallback className="bg-iatrohealth-100 text-iatrohealth-700">
+                JC
+              </AvatarFallback>
+            </Avatar>
+          </Link>
 
           {/* Mobile Menu Button */}
           <Sheet>
