@@ -85,9 +85,13 @@ const MedicationTracker = () => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const newMedication = {
+    // Create a new medication with all required fields explicitly typed
+    const newMedication: Medication = {
       id: Date.now().toString(),
-      ...values
+      name: values.name,
+      dosage: values.dosage,
+      frequency: values.frequency,
+      time: values.time
     };
     
     setMedications([...medications, newMedication]);
