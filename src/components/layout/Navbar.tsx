@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, User, BellRing } from "lucide-react";
+import { Menu, X, User, BellRing, Pill, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,6 +19,8 @@ const Navbar = () => {
     { label: "Nutrition", path: "/nutrition" },
     { label: "Exercise", path: "/exercise" },
     { label: "Devices", path: "/devices" },
+    { label: "Medications", path: "/devices", icon: Pill },
+    { label: "Doctor Chat", path: "/devices", icon: MessageSquare },
   ];
 
   return (
@@ -39,10 +41,11 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link
-              key={item.path}
+              key={item.path + item.label}
               to={item.path}
-              className="text-sm font-medium transition-colors hover:text-iatrohealth-500"
+              className="text-sm font-medium transition-colors hover:text-iatrohealth-500 flex items-center"
             >
+              {item.icon && <item.icon className="h-4 w-4 mr-1" />}
               {item.label}
             </Link>
           ))}
@@ -81,11 +84,12 @@ const Navbar = () => {
               <div className="flex flex-col space-y-6 pt-6">
                 {navItems.map((item) => (
                   <Link
-                    key={item.path}
+                    key={item.path + item.label}
                     to={item.path}
-                    className="text-lg font-medium transition-colors hover:text-iatrohealth-500"
+                    className="text-lg font-medium transition-colors hover:text-iatrohealth-500 flex items-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    {item.icon && <item.icon className="h-4 w-4 mr-2" />}
                     {item.label}
                   </Link>
                 ))}

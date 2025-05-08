@@ -9,7 +9,9 @@ import {
   Layers,
   Heart,
   Video,
-  Clock
+  Clock,
+  Pill,
+  MessageSquare
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
@@ -96,6 +98,22 @@ const Index = () => {
                 >
                   <Heart className="mr-2 h-4 w-4" />
                   Devices
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start"
+                >
+                  <Pill className="mr-2 h-4 w-4" />
+                  Medications
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start"
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Doctor Chat
                 </Button>
               </div>
 
