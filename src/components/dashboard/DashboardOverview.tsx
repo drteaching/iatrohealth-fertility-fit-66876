@@ -23,8 +23,8 @@ const DashboardOverview = () => {
     caloriesGoal: 2000,
     heartRate: 68,
     sleepHours: 7.2,
-    weight: 183,
-    weightChange: -2.3,
+    weight: 83,
+    weightChange: -1.0,
     bmi: 29.4,
     cycleDay: 16,
     cyclePhase: "Fertile window",
@@ -53,9 +53,9 @@ const DashboardOverview = () => {
             <Layers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{healthStats.weight} lbs</div>
+            <div className="text-2xl font-bold">{healthStats.weight} kg</div>
             <div className={`text-xs ${healthStats.weightChange < 0 ? "text-green-500" : "text-fertility-500"} flex items-center`}>
-              {healthStats.weightChange < 0 ? "↓" : "↑"} {Math.abs(healthStats.weightChange)} lbs this month
+              {healthStats.weightChange < 0 ? "↓" : "↑"} {Math.abs(healthStats.weightChange)} kg this month
             </div>
             <div className="mt-4">
               <div className="flex items-center justify-between text-xs mb-1">

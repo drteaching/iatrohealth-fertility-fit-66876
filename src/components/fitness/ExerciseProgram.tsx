@@ -487,10 +487,10 @@ const ExerciseProgram = () => {
                     <div className="border-t pt-4">
                       <h4 className="text-sm font-medium mb-3">Your Progress</h4>
                       <div className="text-xs text-muted-foreground mb-1">
-                        Based on your weight loss goal of 8 lbs:
+                        Based on your weight loss goal of 3.6 kg:
                       </div>
                       <div className="flex justify-between text-xs mb-1">
-                        <span>2.3 lbs lost</span>
+                        <span>1.0 kg lost</span>
                         <span>29% of goal</span>
                       </div>
                       <Progress value={29} className="h-1.5" />
