@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
-import { Camera, Plus, ArrowUp, ArrowDown, ImageIcon } from "lucide-react";
+import { Camera, Plus, ArrowUp, ArrowDown, ImageIcon, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mock data for meal entries
 const mockMeals = [
@@ -49,9 +50,78 @@ const CalorieTracker = () => {
   const [activeTab, setActiveTab] = useState("today");
   const [meals, setMeals] = useState(mockMeals);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  
+  // User profile for nutrition calculations
+  const [userProfile, setUserProfile] = useState({
+    age: 30,
+    sex: "female" as "male" | "female",
+    weight: 68, // kg
+    height: 165, // cm
+    activityLevel: "moderate" as "sedentary" | "light" | "moderate" | "active" | "very-active",
+    goal: "maintain" as "lose" | "maintain" | "gain"
+  });
 
-  // Mock calorie goals and stats
-  const calorieGoal = 2000;
+  // Calculate BMI
+  const calculateBMI = () => {
+    const heightInMeters = userProfile.height / 100;
+    return userProfile.weight / (heightInMeters * heightInMeters);
+  };
+
+  // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor
+  const calculateBMR = () => {
+    const { weight, height, age, sex } = userProfile;
+    if (sex === "male") {
+      return 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      return 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+  };
+
+  // Calculate Total Daily Energy Expenditure (TDEE)
+  const calculateTDEE = () => {
+    const bmr = calculateBMR();
+    const activityMultipliers = {
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      active: 1.725,
+      "very-active": 1.9
+    };
+    return bmr * activityMultipliers[userProfile.activityLevel];
+  };
+
+  // Calculate daily calorie goal based on weight goal
+  const calculateCalorieGoal = () => {
+    const tdee = calculateTDEE();
+    const goalAdjustments = {
+      lose: -500, // 0.5 kg per week
+      maintain: 0,
+      gain: 300
+    };
+    return Math.round(tdee + goalAdjustments[userProfile.goal]);
+  };
+
+  // Calculate macro targets based on DRI recommendations
+  const calculateMacroTargets = () => {
+    const calories = calculateCalorieGoal();
+    const proteinGramsPerKg = userProfile.goal === "lose" ? 1.6 : 1.2;
+    
+    return {
+      protein: Math.round(userProfile.weight * proteinGramsPerKg), // g
+      carbs: Math.round((calories * 0.50) / 4), // 45-65% of calories, using 50%
+      fat: Math.round((calories * 0.30) / 9), // 20-35% of calories, using 30%
+      // Micronutrients (simplified DRI recommendations)
+      calcium: 1000, // mg
+      vitaminC: userProfile.sex === "male" ? 90 : 75, // mg
+      iron: userProfile.sex === "male" ? 8 : 18, // mg
+      water: Math.round(userProfile.weight * 35) // ml (35ml per kg body weight)
+    };
+  };
+
+  const bmi = calculateBMI();
+  const calorieGoal = calculateCalorieGoal();
+  const macroTargets = calculateMacroTargets();
+  
   const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
   const totalCarbs = meals.reduce((sum, meal) => sum + meal.carbs, 0);
   const totalProtein = meals.reduce((sum, meal) => sum + meal.protein, 0);
@@ -374,6 +444,174 @@ const CalorieTracker = () => {
         </Card>
 
         <div className="space-y-6">
+          {/* Daily Nutrition Targets */}
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Your Daily Targets
+              </CardTitle>
+              <CardDescription>
+                Personalized nutrition goals based on your profile
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* BMI Display */}
+              <div className="p-3 rounded-lg bg-background/60 border">
+                <div className="text-xs text-muted-foreground mb-1">Body Mass Index</div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{bmi.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Calorie Target */}
+              <div className="p-3 rounded-lg bg-background/60 border">
+                <div className="text-xs text-muted-foreground mb-1">Daily Calories</div>
+                <div className="text-2xl font-bold">{calorieGoal.toLocaleString()} kcal</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Goal: {userProfile.goal === "lose" ? "Weight Loss" : userProfile.goal === "gain" ? "Weight Gain" : "Maintenance"}
+                </div>
+              </div>
+
+              {/* Macro Targets */}
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Macronutrient Targets</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-2 rounded bg-background/60">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-primary"></span>
+                      <span className="text-sm">Carbs</span>
+                    </div>
+                    <span className="text-sm font-medium">{macroTargets.carbs}g</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 rounded bg-background/60">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-secondary"></span>
+                      <span className="text-sm">Protein</span>
+                    </div>
+                    <span className="text-sm font-medium">{macroTargets.protein}g</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 rounded bg-background/60">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-accent"></span>
+                      <span className="text-sm">Fat</span>
+                    </div>
+                    <span className="text-sm font-medium">{macroTargets.fat}g</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Key Micronutrients */}
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Daily Micronutrient Goals</div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded bg-background/60">
+                    <div className="text-muted-foreground">Calcium</div>
+                    <div className="font-medium">{macroTargets.calcium}mg</div>
+                  </div>
+                  <div className="p-2 rounded bg-background/60">
+                    <div className="text-muted-foreground">Vitamin C</div>
+                    <div className="font-medium">{macroTargets.vitaminC}mg</div>
+                  </div>
+                  <div className="p-2 rounded bg-background/60">
+                    <div className="text-muted-foreground">Iron</div>
+                    <div className="font-medium">{macroTargets.iron}mg</div>
+                  </div>
+                  <div className="p-2 rounded bg-background/60">
+                    <div className="text-muted-foreground">Water</div>
+                    <div className="font-medium">{(macroTargets.water / 1000).toFixed(1)}L</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Settings */}
+              <details className="group">
+                <summary className="cursor-pointer text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                  Adjust Profile Settings
+                </summary>
+                <div className="mt-3 space-y-3 pt-3 border-t">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="age" className="text-xs">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={userProfile.age}
+                        onChange={(e) => setUserProfile({ ...userProfile, age: parseInt(e.target.value) || 0 })}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="sex" className="text-xs">Sex</Label>
+                      <Select value={userProfile.sex} onValueChange={(value: "male" | "female") => setUserProfile({ ...userProfile, sex: value })}>
+                        <SelectTrigger id="sex" className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="weight" className="text-xs">Weight (kg)</Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={userProfile.weight}
+                        onChange={(e) => setUserProfile({ ...userProfile, weight: parseFloat(e.target.value) || 0 })}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="height" className="text-xs">Height (cm)</Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        value={userProfile.height}
+                        onChange={(e) => setUserProfile({ ...userProfile, height: parseFloat(e.target.value) || 0 })}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="activity" className="text-xs">Activity Level</Label>
+                    <Select value={userProfile.activityLevel} onValueChange={(value: any) => setUserProfile({ ...userProfile, activityLevel: value })}>
+                      <SelectTrigger id="activity" className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sedentary">Sedentary (little/no exercise)</SelectItem>
+                        <SelectItem value="light">Light (1-3 days/week)</SelectItem>
+                        <SelectItem value="moderate">Moderate (3-5 days/week)</SelectItem>
+                        <SelectItem value="active">Active (6-7 days/week)</SelectItem>
+                        <SelectItem value="very-active">Very Active (athlete)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="goal" className="text-xs">Weight Goal</Label>
+                    <Select value={userProfile.goal} onValueChange={(value: any) => setUserProfile({ ...userProfile, goal: value })}>
+                      <SelectTrigger id="goal" className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="lose">Lose Weight (-0.5 kg/week)</SelectItem>
+                        <SelectItem value="maintain">Maintain Weight</SelectItem>
+                        <SelectItem value="gain">Gain Weight (+0.3 kg/week)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </details>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Quick Add</CardTitle>
