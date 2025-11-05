@@ -12,20 +12,42 @@ import {
   Clock,
   Pill,
   MessageSquare,
-  User
+  User,
+  Sparkles
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
+import AuthForm from "@/components/auth/AuthForm";
 import Navbar from "@/components/layout/Navbar";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import DeviceConnection from "@/components/wearables/DeviceConnection";
 import CycleTracker from "@/components/cycle/CycleTracker";
 import CalorieTracker from "@/components/nutrition/CalorieTracker";
 import ExerciseProgram from "@/components/fitness/ExerciseProgram";
+import HealthAssistantChat from "@/components/ai/HealthAssistantChat";
 
 const Index = () => {
   const [activePage, setActivePage] = useState("dashboard");
+  const [showAIChat, setShowAIChat] = useState(false);
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <AuthForm />;
+  }
 
   const renderActivePage = () => {
+    if (showAIChat) {
+      return <HealthAssistantChat onClose={() => setShowAIChat(false)} />;
+    }
+    
     switch (activePage) {
       case "dashboard":
         return <DashboardOverview />;
@@ -111,11 +133,15 @@ const Index = () => {
                 </Button>
                 
                 <Button 
-                  variant="ghost" 
+                  variant={showAIChat ? "secondary" : "ghost"} 
+                  onClick={() => {
+                    setShowAIChat(true);
+                    setActivePage("");
+                  }}
                   className="w-full justify-start"
                 >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Clinician Chat
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  AI Health Assistant
                 </Button>
 
                 <Link to="/account">
